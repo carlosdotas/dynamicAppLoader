@@ -7,6 +7,7 @@
                 version: '',
                 author: '',
                 url: '',
+                homePage:'#modulos/home/index.html',
                 license: '',
                 icon: '', // Adicionado o parâmetro icon
                 content: '', // Adicionado o parâmetro content
@@ -30,7 +31,46 @@
                     this.checkUrlForModule(); // Verificar a URL para o módulo após carregar os recursos
                     this.monitorHashChange(); // Monitorar mudanças na hash da URL
                 });
+                //const homePage = this.settings.homePage;                
+                //window.location.href = homePage;                     
+                // Definindo um monitor para uma função chamada "minhaFuncao"
+
+                // Garantir que o namespace easyui existe
+                const homePage = this.settings.homePage; 
+
+                // Função que verifica a criação de window.$.fn.dialog
+                function monitorDialogCreation() {
+                    const intervalId = setInterval(() => {
+                        if (window.$ && window.$.fn && typeof window.$.fn.dialog === 'function') {
+                            clearInterval(intervalId);
+
+                            window.location.href = homePage; 
+                        }
+                    }, 10); // Verifica a cada 100ms
+                }
+
+                // Inicia o monitoramento
+                monitorDialogCreation();
+
+
             });
+        }
+
+        getApp() {
+            return this.settings;
+        }
+
+        options(key, options) {
+            if (key && options) {
+                this.settings.modules[key] = {...this.settings.modules[key],...options};
+                if (typeof options.onLoad === 'function') {
+                    options.onLoad(this.settings.modules[key]);
+                }
+            }
+        }
+
+        getModule(key) {
+            return this.settings.modules[key];
         }
 
         applySettings() {
@@ -73,7 +113,7 @@
             }
         }
 
-        addContent(content, parent) {
+        addContent(content, parent, url) {
             let component = $(content);
             let parentElement;
 
@@ -92,7 +132,8 @@
             } else {
                 $('body').append(component);
             }
-
+            component.attr("id", url);
+            this.settings.modules[url] = {id:url,component:component};
             return component;
         }
 
@@ -102,8 +143,8 @@
                     const tempDiv = $('<div>').html(data);
                     const scripts = tempDiv.find('script').remove();
                     const content = tempDiv.html();
-
-                    this.addContent(content, parent);
+                    
+                    this.addContent(content, parent, url);
 
                     scripts.each((index, script) => {
                         const scriptTag = document.createElement('script');
@@ -119,18 +160,10 @@
             }
         }
 
-        checkUrlForModule() {
-            const urlParams = new URLSearchParams(window.location.hash.slice(1));
-            const moduloUrl = urlParams.get('modulo');
-
-            if (moduloUrl) {
-                this.addModulo(moduloUrl);
-            }
-        }
 
         monitorHashChange() {
             window.addEventListener('hashchange', () => {
-                this.checkUrlForModule();
+
             });
         }
 
@@ -220,8 +253,7 @@
             this.loadScript(url, options);
         }
 
-        // Novo método para obter os parâmetros da URL
-        getUrlParams() {
+        GET() {
             return this.urlParams;
         }
     }
@@ -252,6 +284,8 @@
         if (url) {
             const app = $(document).data('appInstance');
             if (app) {
+
+                app.settings.modules[url] = {};
                 app.urlParams = params; // Armazenar os parâmetros da URL
                 app.addModulo(url.split('?')[0], parent ? `#${decodeURIComponent(parent)}` : undefined); // Decodificar e passar o seletor do componente pai
 
