@@ -170,6 +170,130 @@ $.apps('options', 'modulos/home/index.html', {
 });
 ```
 
+## Opções
+
+O método `options` permite configurar várias definições para sua aplicação ou módulo. Abaixo estão as opções disponíveis e suas descrições:
+
+- **`id`**: (string) Um identificador único para o módulo.
+- **`title`**: (string) O título do módulo.
+- **`fit`**: (boolean) Se verdadeiro, o módulo se ajustará para caber no contêiner.
+- **`closed`**: (boolean) Se falso, o módulo estará aberto por padrão.
+- **`cache`**: (boolean) Se falso, o módulo não será armazenado em cache.
+- **`modal`**: (boolean) Se verdadeiro, o módulo será modal.
+- **`icon`**: (string) Especifica o ícone para o módulo. *(Novo)*
+- **`content`**: (string) Define o conteúdo HTML inicial para o módulo. *(Novo)*
+- **`events`**: (array) Define uma lista de eventos a serem vinculados aos elementos especificados.
+- **`onOpen`**: (function) Uma função de callback a ser executada quando o módulo for aberto.
+- **`onLoad`**: (function) Uma função de callback a ser executada quando o módulo for carregado.
+- **`onClick`**: (array) Define eventos de clique para elementos específicos. *(Novo)*
+- **`onKeyPress`**: (array) Define eventos de tecla pressionada para elementos específicos. *(Novo)*
+
+### Exemplo
+
+```javascript
+$.apps('options', {
+    id: 'encomendasList',
+    title: '<i class="fas fa-map-marker-alt"></i> Lista de Encomendas',
+    fit: true,
+    closed: false,
+    cache: false,
+    modal: true,
+    icon: 'path/to/icon.png',
+    content: '<div>Conteúdo Inicial</div>',
+    events: [
+        {
+            '.bntDel[contextmenu]': function(data) {
+                alert('Botão Delete clicado com botão direito');
+            }
+        },
+    ],
+    onOpen: function() {
+        $.parser.parse();
+    },
+    onLoad: function(data) {
+        data.component.dialog(data);
+
+        $.apps('waitForFunction', 'dataGridHandler', function() {
+            $(data.component).find('.dataGridEncomendas').dataGridHandler('server/encomendas/index.php?list=encomendas');
+        });
+    },
+    onClick: [
+        {
+            '.saveBtn[click]': function() {
+                alert('Botão Salvar clicado');
+            }
+        }
+    ],
+    onKeyPress: [
+        {
+            'input[type="text"][keypress]': function(event) {
+                if (event.key === 'Enter') {
+                    alert('Enter pressionado');
+                }
+            }
+        }
+    ]
+});
+```
+
+
+## Exemplo Completo
+
+Aqui está um exemplo completo demonstrando como usar o `ContentLoader` e o método `options` juntos:
+
+```javascript
+$(document).ready(function() {
+    const contentLoader = new ContentLoader(window.location.href);
+    contentLoader.initializeMethods();
+
+    $.apps('options', {
+        id: 'encomendasList',
+        title: '<i class="fas fa-map-marker-alt"></i> Lista de Encomendas',
+        fit: true,
+        closed: false,
+        cache: false,
+        modal: true,
+        icon: 'path/to/icon.png',
+        content: '<div>Conteúdo Inicial</div>',
+        events: [
+            {
+                '.bntDel[contextmenu]': function(data) {
+                    alert('Botão Delete clicado com botão direito');
+                }
+            },
+        ],
+        onOpen: function() {
+            $.parser.parse();
+        },
+        onLoad: function(data) {
+            data.component.dialog(data);
+
+            $.apps('waitForFunction', 'dataGridHandler', function() {
+                $(data.component).find('.dataGridEncomendas').dataGridHandler('server/encomendas/index.php?list=encomendas');
+            });
+        },
+        onClick: [
+            {
+                '.saveBtn[click]': function() {
+                    alert('Botão Salvar clicado');
+                }
+            }
+        ],
+        onKeyPress: [
+            {
+                'input[type="text"][keypress]': function(event) {
+                    if (event.key === 'Enter') {
+                        alert('Enter pressionado');
+                    }
+                }
+            }
+        ]
+    });
+});
+```
+
+
+
 ## Licença
 Este projeto está licenciado sob a [MIT License](LICENSE).
 
