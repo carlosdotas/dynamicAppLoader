@@ -50,13 +50,24 @@
 
         options(options) {
 
+    
+
             this.settings.modules[options.id] = {...this.settings.modules[options.id],...options};
 
-            const $component = this.settings.modules[options.id].component;
+            const $options = this.settings.modules[options.id];
+            const $component = $options.component;
+
+            this.settings.modules[options.id].close = function(){
+                //if (typeof options.onClose === 'function') {
+                $options.onClose($options);
+                //}                
+                $component.remove();
+            }
 
             if (typeof options.onLoad === 'function') {
-                options.onLoad(this.settings.modules[options.id]);
+                options.onLoad($options);
             }
+
 
             const addEventListeners = (actions, selectorModifier = '', preventDefault = false) => {
                 if (Array.isArray(actions)) {
@@ -69,7 +80,7 @@
                                 // Adicionando o evento ao componente com event delegation
                                 $($component).on(eventType, selector + selectorModifier, function(event) {
                                     if (preventDefault) event.preventDefault();
-                                    action[key].call(this, event);
+                                    action[key].call(this, event, $options);
                                 });
                             }
                         });
